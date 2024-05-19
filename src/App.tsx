@@ -4,10 +4,13 @@ import { peopleFromServer } from './data/people';
 import { Person } from './types/Person';
 import cn from 'classnames';
 
-function debounce(callback: (...args: any) => void, delay: number) {
+function debounce<T>(
+  callback: (args: T) => void,
+  delay: number,
+): (args: T) => void {
   let timerId = 0;
 
-  return (...args: any) => {
+  return (...args) => {
     window.clearTimeout(timerId);
 
     timerId = window.setTimeout(() => {
