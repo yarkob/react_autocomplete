@@ -27,24 +27,29 @@ export const App: React.FC = () => {
 
   const applyQuery = useMemo(() => debounce(setAppliedQuery, 1000), []);
 
+  const filteredPeople = useMemo(() => {
+    return peopleFromServer.filter(person =>
+      person.name.toLowerCase().includes(appliedQuery.toLowerCase()),
+    );
+  }, [appliedQuery]);
+
   const onSearchHandler = (event: ChangeEvent<HTMLInputElement>) => {
+    if (!filteredPeople.length) {
+      event.preventDefault();
+    }
+
     setQuery(event.target.value);
     applyQuery(event.target.value);
     setSelectedPerson(null);
   };
 
   const onSelect = (person: Person) => () => {
+    setQuery(person.name);
     setSelectedPerson(person);
   };
 
   const onFocus = () => setIsDropdown(true);
   const onBlur = () => setIsDropdown(false);
-
-  const filteredPeople = useMemo(() => {
-    return peopleFromServer.filter(person =>
-      person.name.includes(appliedQuery),
-    );
-  }, [appliedQuery]);
 
   return (
     <div className="container">
@@ -73,20 +78,26 @@ export const App: React.FC = () => {
             />
           </div>
 
-          <div className="dropdown-menu" role="menu" data-cy="suggestions-list">
-            <div className="dropdown-content">
-              {filteredPeople.map(person => (
-                <div
-                  key={person.name}
-                  className="dropdown-item"
-                  data-cy="suggestion-item"
-                  onMouseDown={onSelect(person)}
-                >
-                  <p className="has-text-link">{person.name}</p>
-                </div>
-              ))}
+          {!!filteredPeople.length && (
+            <div
+              className="dropdown-menu"
+              role="menu"
+              data-cy="suggestions-list"
+            >
+              <div className="dropdown-content">
+                {filteredPeople.map(person => (
+                  <div
+                    key={person.name}
+                    className="dropdown-item"
+                    data-cy="suggestion-item"
+                    onMouseDown={onSelect(person)}
+                  >
+                    <p className="has-text-link">{person.name}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {!filteredPeople.length && (
